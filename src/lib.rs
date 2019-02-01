@@ -60,7 +60,7 @@
 
 extern crate directories;
 extern crate serde;
-extern crate toml;
+extern crate serde_json;
 
 mod utils;
 use utils::*;
@@ -97,12 +97,12 @@ pub fn load<T: Serialize + DeserializeOwned + Default>(name: &str) -> Result<T, 
 
     let path: PathBuf = [
         project.config_dir().to_str().unwrap(),
-        &format!("{}.toml", name),
+        &format!("{}.json", name),
     ].iter()
         .collect();
 
     match File::open(&path) {
-        Ok(mut cfg) => Ok(toml::from_str(&cfg.get_string().unwrap()).unwrap()),
+        Ok(mut cfg) => Ok(serde_json::from_str(&cfg.get_string().unwrap()).unwrap()),
         Err(ref e) if e.kind() == NotFound => {
             fs::create_dir_all(project.config_dir())?;
             store(name, T::default())?;
@@ -139,12 +139,12 @@ pub fn store<T: Serialize>(name: &str, cfg: T) -> Result<(), IoError> {
 
     let path: PathBuf = [
         project.config_dir().to_str().unwrap(),
-        &format!("{}.toml", name),
+        &format!("{}.json", name),
     ].iter()
         .collect();
 
     let mut f = OpenOptions::new().write(true).create(true).open(path)?;
-    let s = toml::to_string_pretty(&cfg).unwrap();
+    let s = serde_json::to_string(&cfg).unwrap();
     f.write_all(s.as_bytes())?;
     Ok(())
 }
