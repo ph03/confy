@@ -143,7 +143,7 @@ pub fn store<T: Serialize>(name: &str, cfg: T) -> Result<(), IoError> {
     ].iter()
         .collect();
 
-    let mut f = OpenOptions::new().write(true).create(true).open(path)?;
+    let mut f = OpenOptions::new().write(true).create(true).truncate(true).open(path)?;
     let s = serde_json::to_string(&cfg).unwrap();
     f.write_all(s.as_bytes())?;
     Ok(())
